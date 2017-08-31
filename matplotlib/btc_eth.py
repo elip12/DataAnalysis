@@ -24,7 +24,7 @@ btc = np.round(btc, 2)
 
 #read ethereum data from text file (copied from
 # https://etherchain.org/api/statistics/price)
-with open('eth_data.txt', 'r') as dict_file:
+with open('../eth_data.txt', 'r') as dict_file:
 	eth = eval(dict_file.read())
 eth = pd.DataFrame(eth['data'])
 eth.index = pd.to_datetime(eth.index, unit='h', origin='2015-09-01 07:56:28')
