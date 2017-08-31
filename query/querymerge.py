@@ -1,3 +1,10 @@
+# querymerge
+# author: Eli Pandolfo
+#
+# A script that pulls data from csv files in pandas dataframes, performs
+# analysis (applies a statistical function, e.g. mean, sum, min) on a slice
+# of the data, and appends the results of the analysis to another CSV file
+
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -20,16 +27,21 @@ def splitFile(filename):
     compNumber = components[-3].split('-')[1]
     return (timestamp, compNumber)
 
-#returns a 13-digit timestamp given a utc datetime in format: YYYY-mm-ddTHH:MM:SS.fffZ or format: YYYY-mm-dd HH:MM:SS.ffffff+00:00
+#returns a 13-digit timestamp given a utc datetime in format:
+# YYYY-mm-ddTHH:MM:SS.fffZ or format: YYYY-mm-dd HH:MM:SS.ffffff+00:00
 def parse_ts(utc_dt):
     if utc_dt.strip()[-1] == 'Z':
-        return int(dt.datetime.strptime(utc_dt, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=dt.timezone.utc).timestamp()*1000)
+        return int(dt.datetime.strptime(utc_dt,
+					'%Y-%m-%dT%H:%M:%S.%fZ').replace(
+					tzinfo=dt.timezone.utc).timestamp()*1000)
     else:
-        return int(dt.datetime.strptime(utc_dt, '%Y-%m-%d %H:%M:%S.%f+00:00').replace(tzinfo=dt.timezone.utc).timestamp()*1000)
+        return int(dt.datetime.strptime(utc_dt,
+					'%Y-%m-%d %H:%M:%S.%f+00:00').replace(
+					tzinfo=dt.timezone.utc).timestamp()*1000)
 
-#returns true if two different timestamps are within 30 minutes apart
+#returns true if two different timestamps are within 30 minutes of each other
 def isWithinTimeRange(base, compare, diff=30):
-    minutes_range = diff  # this is the key parameter to test difference in time.
+    minutes_range = diff  # this is the key parameter to test difference in time
     ms_range = minutes_range*60*1000
     ibase = int(base)
     icompare = int(compare)
@@ -39,9 +51,10 @@ def tsname(ts):
     start_ = ts.find('time_') + 5
     return ts[start_:]
 
-#converts a string input into a numpy fcn that can be applied to a DataFrame of Series
-#this is better than getattr because np functions are not attributes of pandas objects and
-#the pandas min, max, mean, etc don't work in the way we want them to
+# converts a string input into a numpy fcn that can be applied to a DataFrame or
+# Series. This is better than getattr because np functions are not attributes of
+# pandas objects and the pandas min, max, mean, etc don't work in the way we
+# want them to
 def fcnConvert(fcn):
     if fcn == 'mean' or fcn == 'np.mean':
         fcn = np.mean
@@ -53,7 +66,7 @@ def fcnConvert(fcn):
         fcn = np.max
     return fcn
 
-#evaulates fcns on given columns in a data frame in a given time window
+#evaulates fcns on given columns in a DataFrame for a given time window
 def evaluate(df, ts_screen, timestamp, var_names, fcns, delta_ts):
     #get range of data from ts arguments
     start_ts = (ts_screen - int(timestamp))/1000
@@ -68,7 +81,8 @@ def evaluate(df, ts_screen, timestamp, var_names, fcns, delta_ts):
         if var_name not in names:
             missingPos.append(var_names2.index(var_name))
 
-    #delete the elements in var_names the indices in missingPos; ugly but it works and I think its the shortest solution
+    # delete the elements in var_names the indices in missingPos; ugly but it
+	# works and I think it's the shortest solution
     for i in range(len(missingPos)-1, -1,-1):
         del var_names2[missingPos[i]]
 
@@ -77,7 +91,6 @@ def evaluate(df, ts_screen, timestamp, var_names, fcns, delta_ts):
 
     #get dataframe of values from the range within that column (inclusive)
     values = varcols[start_ts:end_ts]
-    #print(values)
 
     #perform fcn on values, store into list
     results = []
@@ -90,9 +103,10 @@ def evaluate(df, ts_screen, timestamp, var_names, fcns, delta_ts):
 
     return results, missingPos
 
-#--------------------------------------------Afdx-------------------------------------------------------
+#--------------------------------------------Afdx------------------------------
 
-# returns [[var1_fcn1, var1_fcn2... ,var1_fcnN]... ,[varM_fcn1, varM_fcn2... ,varM_fcnM]]
+# returns [[var1_fcn1, var1_fcn2... ,var1_fcnN]...,
+# 		   [varM_fcn1, varM_fcn2... ,varM_fcnM]]
 def queryAfdx(directory, ts_screen, ID, var_names, fcns, delta_ts=20):
     filename = 'NaN'
     ID = str(ID)
@@ -108,7 +122,8 @@ def queryAfdx(directory, ts_screen, ID, var_names, fcns, delta_ts=20):
 
     #error handling
     if(filename == 'NaN'):
-        return 'ERROR: No Afdx file found with ID=' + ID + ' and timestamp within 30 minutes of' + str(ts_screen), []
+        return ('ERROR: No Afdx file found with ID=' + ID + ' and timestamp \
+				within 30 minutes of' + str(ts_screen), [])
 
     #read csv file, and open as a pandas dataframe
     filepath = directory + 'Afdx/' + filename
@@ -125,12 +140,10 @@ def queryAfdx(directory, ts_screen, ID, var_names, fcns, delta_ts=20):
     #perform functions on given cols and ts ranges
     return evaluate(df, ts_screen, timestamp, var_names, fcns, delta_ts)
 
-#Afdx test run
-#print(queryAfdx('./data/Processed/', 1480728125000+0000, 15, ['phasicData','sadness', 'disgust', 'GSR'], ['min', 'max'], 1))
+#-------------------------------------------Leda---------------------------------
 
-#-------------------------------------------Leda------------------------------------------------------------------
-
-# returns [[var1_fcn1, var1_fcn2... ,var1_fcnN]... ,[varM_fcn1, varM_fcn2... ,varM_fcnM]]
+# returns [[var1_fcn1, var1_fcn2... ,var1_fcnN]... ,
+#		   [varM_fcn1, varM_fcn2... ,varM_fcnM]]
 def queryLeda(directory, ts_screen, ID, var_names, fcns, delta_ts=20):
     filename = 'NaN'
     ID = str(ID)
@@ -147,7 +160,8 @@ def queryLeda(directory, ts_screen, ID, var_names, fcns, delta_ts=20):
 
     #error handling
     if(filename == 'NaN'):
-        return 'ERROR: No Leda file found with ID=' + ID + ' and timestamp within 30 minutes of ' + str(ts_screen), []
+        return 'ERROR: No Leda file found with ID=' + ID + ' and timestamp \
+				within 30 minutes of ' + str(ts_screen), []
 
     #read csv file, and open as a pandas dataframe
     filepath = dr + '/' + filename
@@ -164,12 +178,10 @@ def queryLeda(directory, ts_screen, ID, var_names, fcns, delta_ts=20):
     #perform functions on given cols and ts ranges
     return evaluate(df, ts_screen, timestamp, var_names, fcns, delta_ts)
 
-#Leda test run
-#print(queryLeda('./data/Processed/Leda/', 1480726711734+0000, 13, ['analysis.driver', 'analysis.phasicData'], [np.mean, np.std], 2000))
+#----------------------------merge----------------------------------------------
 
-#----------------------------merge----------------------------------------------------------
-
-#returns
+# merges pulled afdx and leda aggregates into columns of a new df, that gets
+# appended to a csv file
 def merge(directory, merge_df_file, ID_col, ts_screens, variables, fcns, delta_ts):
 
     #open dataframe
@@ -186,7 +198,9 @@ def merge(directory, merge_df_file, ID_col, ts_screens, variables, fcns, delta_t
                 if ts in merge_df:
                     augmentedCols.append((colname,ts_name))
                 newcol = np.zeros(numrows)
-                joincol = pd.DataFrame(newcol, index=merge_df.index, columns=[colname])
+                joincol = pd.DataFrame(newcol,
+									   index=merge_df.index,
+									   columns=[colname])
                 merge_df = merge_df.join(joincol)
 
 #player_time_EmoQuestPage1_2
@@ -203,22 +217,35 @@ def merge(directory, merge_df_file, ID_col, ts_screens, variables, fcns, delta_t
                 if(ID<10):
                     ID = '0' + str(ID)
                 #query for afdx and leda results
-                afdxResults, afdxMissingPos = queryAfdx(directory, screenNum, ID, variables, fcns, delta_ts)
-                ledaResults, ledaMissingPos = queryLeda(directory, screenNum, ID, variables, fcns, delta_ts)
+                afdxResults, afdxMissingPos = queryAfdx(directory, screenNum,
+					ID, variables, fcns, delta_ts)
+                ledaResults, ledaMissingPos = queryLeda(directory, screenNum,
+					ID, variables, fcns, delta_ts)
 
                 #splice affdex and leda results together
-                if isinstance(afdxResults, list) and not isnan(afdxResults[0][0]) and isinstance(ledaResults, list) and not isnan(ledaResults[0][0]):
+                if isinstance(afdxResults, list)
+						and not isnan(afdxResults[0][0])
+						and isinstance(ledaResults, list)
+						and not isnan(ledaResults[0][0]):
                     splicedList = afdxResults
                     for i in range(len(ledaResults)):
                         splicedList.insert(afdxMissingPos[i], ledaResults[i])
-                elif isinstance(afdxResults, list) and not isnan(afdxResults[0][0]) and (not isinstance(ledaResults, list) or isnan(ledaResults[0][0])):
+                elif isinstance(afdxResults, list)
+						and not isnan(afdxResults[0][0])
+						and (not isinstance(ledaResults, list)
+						or isnan(ledaResults[0][0])):
                     splicedList = afdxResults
                     for i in afdxMissingPos:
-                        splicedList.insert(i, np.repeat('NaN', len(fcns)).tolist())
-                elif (not isinstance(afdxResults, list) or isnan(afdxResults[0][0])) and isinstance(ledaResults, list) and not isnan(ledaResults[0][0]):
+                        splicedList.insert(i, np.repeat('NaN',
+											len(fcns)).tolist())
+                elif (not isinstance(afdxResults, list)
+						or isnan(afdxResults[0][0]))
+						and isinstance(ledaResults, list)
+						and not isnan(ledaResults[0][0]):
                     splicedList = ledaResults
                     for i in ledaMissingPos:
-                        splicedList.insert(i, np.repeat('NaN', len(fcns)).tolist())
+                        splicedList.insert(i, np.repeat('NaN',
+											len(fcns)).tolist())
                 else:
                     splicedList = []
                     innerList = np.repeat('NaN', len(fcns)).tolist()
@@ -226,7 +253,8 @@ def merge(directory, merge_df_file, ID_col, ts_screens, variables, fcns, delta_t
                         splicedList.append(innerList)
 
                 listIndex = 0
-                flatSplicedList = [num for sublist in splicedList for num in sublist]
+                flatSplicedList = [num for sublist in splicedList
+									for num in sublist]
 
                 for col, ts_name in augmentedCols:
                     if(tsname(ts)) == ts_name:
@@ -234,14 +262,24 @@ def merge(directory, merge_df_file, ID_col, ts_screens, variables, fcns, delta_t
                         listIndex += 1
 
 
-    merge_df.to_csv('/data/KLAB/EEE_data/Processed/oTree/EEE_otree_postquery.csv')
+    merge_df.to_csv('/data/KLAB/EEE_data/Processed/oTree/ \
+					EEE_otree_postquery.csv')
     return
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
-#parse command line arguments for merge fcn: directory, otreefile, idCol, varlist, screenlist, fcnlist, delta_ts
-#IMPORTANT: separate separate command line args with spaces, but separate elements in lists with commas and no spaces
+#parse command line arguments for merge fcn: directory, otreefile, idCol,
+#varlist, screenlist, fcnlist, delta_ts
+#IMPORTANT: separate separate command line args with spaces, but separate
+# in lists with commas and no spaces
 # example command line:
-    # python3 /data/KLAB/ptt_express_analysis/MergeFunctions/querymerge.py /data/KLAB/EEE_data/Processed/ /data/KLAB/EEE_data/Processed/oTree/EEE_otree_new.csv participant_label player_time_EmoQuestPage1_2,player_time_screen3 disgust,analysis.phasicData mean,std 20
+# python3 /data/KLAB/ptt_express_analysis/MergeFunctions/querymerge.py
+#	/data/KLAB/EEE_data/Processed/
+#	/data/KLAB/EEE_data/Processed/oTree/EEE_otree_new.csv
+#	participant_label
+#	player_time_EmoQuestPage1_2,player_time_screen3
+#	disgust,analysis.phasicData
+#	mean,std
+#	20
 directory = str(argv[1])
 otreeFile = str(argv[2])
 idCol = str(argv[3])
