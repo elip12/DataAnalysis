@@ -20,7 +20,7 @@ def get_data():
 	quandl.ApiConfig.api_key = key
 
 	# pull bitcoin price data from bitstamp through quandl
-	# https://www.quandl.com/data/BCHARTS/BITSTAMPUSD-Bitcoin-Markets-bitstampUSD
+	#https://www.quandl.com/data/BCHARTS/BITSTAMPUSD-Bitcoin-Markets-bitstampUSD
 	btc = quandl.get('BCHARTS/BITSTAMPUSD', )
 	btc = btc['Weighted Price']['2017-01-01':]
 	btc = np.round(btc, 2)
@@ -29,7 +29,8 @@ def get_data():
 	r = requests.get('https://etherchain.org/api/statistics/price')
 	eth = eval(r.text)
 	eth = pd.DataFrame(eth['data'])
-	eth.index = pd.to_datetime(eth.index, unit='h', origin='2015-09-01 07:56:28')
+	eth.index = pd.to_datetime(eth.index, unit='h',
+							   origin='2015-09-01 07:56:28')
 	eth = eth['usd'].resample('D').last()
 	eth = eth.loc['2017-01-01':]
 
@@ -37,13 +38,13 @@ def get_data():
 
 # plot the graphs
 def plot(btc, eth):
+
 	fig = plt.figure()
 	fig.patch.set_facecolor('#d4d4d4')
 	fig.canvas.set_window_title('BTC + ETH 2017')
 
 	b = plt.subplot2grid((2, 1), (0, 0), rowspan=1, colspan=1)
 	e = plt.subplot2grid((2, 1), (1, 0), rowspan=1, colspan=1, sharex=b)
-
 	font = {'size': 16}
 
 	# customize graphs
