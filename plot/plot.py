@@ -21,7 +21,8 @@ def splitFile(filename):
     compNumber = components[-3].split('-')[1]
     return (timestamp, compNumber)
 
-#creates a dataframe with one column, the aggregate (by a function) of all columns in the df passed as an argument
+# creates a dataframe with one column, the aggregate (by a function) of all
+# columns in the df passed as an argument
 def create_aggr_col(df, fcn):
 	df_aggr = pd.DataFrame()
 	if len(df) == 0:
@@ -51,7 +52,8 @@ def time_range(ts, file_ts):
 # normalizes a dataframe from a csv file:
 # 1) pads all missing index data by filling forward
 # 2) resamples the timestamp index to 5 samples per second
-# 3) makes the index a range from -x to y, with 0 being the timestamp given as an arg
+# 3) makes the index a range from -x to y, with 0 being the
+# 	 timestamp given as an arg
 def normalize(afdxleda, fname, timestamp):
 
 	if afdxleda == 'Afdx':
@@ -59,7 +61,8 @@ def normalize(afdxleda, fname, timestamp):
 	elif afdxleda == 'Leda':
 		index_col = 'data.time.data'
 
-	# make timestamp a 13 digit (millisecond) number (used in case a 9-digit timestamp accurate to seconds is given)
+	# make timestamp a 13 digit (millisecond) number (used in case a 9-digit
+	# timestamp accurate to seconds is given)
 	while timestamp / 1000000000000 < 1:
 		timestamp *= 10
 
@@ -73,7 +76,8 @@ def normalize(afdxleda, fname, timestamp):
 		new_ts = int(float(df[index_col][index]) * 1000 + int(file_ts))
 		df.set_value(index, index_col, new_ts)
 
-	#convert index to datetime, resample data to 5x per second, reconvert back to timestamps
+	# convert index to datetime, resample data to 5x per second,
+	# reconvert back to timestamps
 	df[index_col] = pd.to_datetime(df[index_col], unit = 'ms')
 	df.set_index(index_col, inplace=True)
 	df = df.resample('200L').mean()
@@ -81,12 +85,15 @@ def normalize(afdxleda, fname, timestamp):
 	#c onvert index back to timestamps
 	df.index = df.index.astype(np.int64) / 10**6
 
-	# normalize df's timestamps to have -n < timestamp < m; convert timestamps back to normalized deltatimes
+	# normalize df's timestamps to have -n < timestamp < m; convert timestamps
+	# back to normalized deltatimes
 	df.set_index(np.round((df.index - timestamp) / 1000, 1), inplace=True)
 	return df
 
-# finds a csv file with matching type (afdx or leda), matching leeps ID, and matching timestamp (before or up to 10 min after)
-# returns either NaN if no file was found or the full path to the file (/data/KLAB/ptt_express_analysis/Afdx (or Leda)/filename)
+# finds a csv file with matching type (afdx or leda), matching leeps ID, and
+# matching timestamp (before or up to 10 min after)
+# returns either NaN if no file was found or the full path to the file:
+# /data/KLAB/ptt_express_analysis/Afdx (or Leda)/filename
 def find_csv(afdxleda, directory, ID, ts):
 	filename = 'NaN'
 
@@ -107,7 +114,9 @@ def find_csv(afdxleda, directory, ID, ts):
 			name, ext = os.path.splitext(filen)
 			if ext == '.csv' and name[0:4] == name_start:
 				timestamp, compNumber = splitFile(filen)
-				if compNumber == ID and time_range(int(ts), timestamp) != -1 and (time_range(int(ts), timestamp) < closest or closest == -1):
+				if compNumber == ID and time_range(int(ts), timestamp) != -1
+						and (time_range(int(ts), timestamp) < closest
+						or closest == -1):
 					filename = filen
 					closest = time_range(int(ts), timestamp)
 
@@ -116,8 +125,10 @@ def find_csv(afdxleda, directory, ID, ts):
 
 	return filename
 
-# takes in a toggle for afdx or leda, a csv file with timestamps and IDs, a variable (column header), a function, a time ramge, and an optional message
-# finds matching csv files, normalizes them, and plots them within the time range (from the now normalized 0 timestamp)
+# takes in a toggle for afdx or leda, a csv file with timestamps and IDs,
+# a variable (column header), a function, a time ramge, and an optional message
+# finds matching csv files, normalizes them, and plots them within the time
+# range (from the now normalized 0 timestamp)
 # saves the plot to a file called plot.pf
 def plot(afdxleda, df_in, var, fcn, delta_t, message=''):
 
@@ -127,7 +138,8 @@ def plot(afdxleda, df_in, var, fcn, delta_t, message=''):
 	directory = '/Users/Eli/Desktop/LEEPS/'
 	for row in df_in.index:
 		#find closest csv file
-		fname = find_csv(afdxleda, directory, make_valid_ID(df_in.iloc[row, 0]), df_in.iloc[row, 1])
+		fname = find_csv(afdxleda, directory, make_valid_ID(df_in.iloc[row, 0]),
+						 df_in.iloc[row, 1])
 		if fname != 'NaN':
 			#normalize it to a 0-timestamp and 5 samples per second
 			df_temp = normalize(afdxleda, fname, df_in.iloc[row, 1])
@@ -135,11 +147,15 @@ def plot(afdxleda, df_in, var, fcn, delta_t, message=''):
 			if var in df_temp.columns.values:
 				col_name = splitFile(fname)[1]
 				#create series with variable info and x range
-				column = pd.Series(df_temp[var][-delta_t:delta_t + .1], name=col_name)
+				column = pd.Series(df_temp[var][-delta_t:delta_t + .1],
+							name=col_name)
 				if (len(column) == 0):
-					print('ERROR: no ' + var + ' data in range -' + str(delta_t) + ' to ' + str(delta_t) + ' in file ' + fname)
+					print('ERROR: no ' + var + ' data in range -'
+						  + str(delta_t) + ' to ' + str(delta_t)
+						  + ' in file ' + fname)
 				else:
-					#align all indices to be even decimals (1.0, 1.2, 1.4 vs 1.1, 1.3, 1.5)
+					#align all indices to be even decimals (1.0, 1.2, 1.4
+					# vs 1.1, 1.3, 1.5)
 					if column.index[0] * 10 % 2 == 1:
 				 		column.index = (10 * column.index - 1) / 10
 					df[col_name] = column
@@ -163,6 +179,7 @@ def plot(afdxleda, df_in, var, fcn, delta_t, message=''):
 	plt.savefig('plot.pdf', bbox_inches='tight')
 
 def main():
-	plot('Leda', '/Users/Eli/Desktop/LEEPS/plot_in.csv', 'analysis.phasicData', 'mean', 100, '"this is a sample message"')
+	plot('Leda', '/Users/Eli/Desktop/LEEPS/plot_in.csv', 'analysis.phasicData',
+		 'mean', 100, '"this is a sample message"')
 
 main()
