@@ -74,6 +74,7 @@ def plot(btc, eth):
 	e.yaxis.label.set_color('tab:blue')
 	e.tick_params(colors='#111111')
 
+	plt.tight_layout()
 	plt.show()
 
 btc, eth = get_data()
