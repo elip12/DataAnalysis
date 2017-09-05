@@ -2,13 +2,14 @@
 # github.com/elip12
 # standard foreground color: 848484
 # This style is free and available for anyone to use or modify
+# d = {'green': '#60d515', 'red': '#d22b10', 'blue': '#38d8dc', 'yellow': '#e0cc05',
+#	 'orange': '#eb860d', 'magenta': '#b113ef'}
 
 lines.linewidth: 1
 
 axes.facecolor: 252525
 axes.grid: true
-axes.prop_cycle: cycler('color', ['e1d300', '1d99cf', '00c80c', 'ff8f00', '00e8d3', 'd11d00'])
-
+axes.prop_cycle: cycler('color', {'60d515', 'd22b10', '1fa834', 'e0cc05', 'eb860d', 'b113ef'})
 grid.linestyle: --
 grid.linewidth: .5
 grid.color: 848484

@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import style
-style.use('elip12')
+style.use('./elip12.mplstyle')
 import datetime as dt
 import requests
 
@@ -51,6 +51,10 @@ def get_data():
 
 	return (btc, xrp, eth)
 
+# shows correlation between two datasets
+def correlate(df1, df2):
+	return df1.corr(df2)
+
 # sets limits for y axis to make grid line up with ticks
 def ylim(ax, df):
 	if df.name is 'BTC':
@@ -66,7 +70,8 @@ def subplot(ax1, ax2, df1, df2, color1, color2):
 
 	# customize graphs
 	df1.plot(ax=ax1, color=color1, linewidth=1)
-	ax1.set_title(df1.name + '/USD + ' + df2.name + '/USD')#, color='#848484')
+	ax1.set_title(df1.name + ' ' + df2.name + '     Correlation: '
+				  + str(round(correlate(df1, df2), 2)))
 
 	ax1.tick_params(axis='x', which='both')
 	ax1.xaxis.label.set_visible(False)
@@ -88,7 +93,7 @@ def subplot(ax1, ax2, df1, df2, color1, color2):
 	ax2.tick_params(colors=color2, axis='y')
 	ylim(ax2, df2)
 
-	ax2.plot(0,0, label=df1.name, linewidth=1, color=color1)
+	ax2.plot(0, 0, label=df1.name, linewidth=1, color=color1)
 	leg = plt.legend(loc=2)
 
 # creates 3 subplots, and plots each combination of dfs on them, with
@@ -117,8 +122,10 @@ def plot(df1, df2, df3, color1, color2, color3):
 	# adjust parameters for optimal full screen view
 	plt.subplots_adjust(left=.07, bottom=.09, right=.94, top=.92,
 						wspace=.28, hspace=.31)
+	plt.draw()
 	plt.show()
 
 btc, xrp, eth = get_data()
-b_color, x_color, e_color = '#e1d300', '#1d99cf', '#00c80c'
-plot(btc, xrp, eth, b_color, x_color, e_color)
+d = {'green': '#60d515', 'red': '#d22b10', 'blue': '#1fa8e4',
+	 'yellow': '#e0cc05','orange': '#eb860d', 'magenta': '#b113ef'}
+plot(btc, xrp, eth, d['orange'], d['yellow'], d['red'])
