@@ -1,7 +1,7 @@
-# bitcoin + ripple matplotlib example
+# bitcoin + ethereum + ripple matplotlib example
 # author: Eli Pandolfo
 #
-# A graph of bitcoin price compared to xrp price for the year 2017,
+# A graph of bitcoin compared to xrp compared to ether for the year 2017,
 # with shared x axes, and data retrieved from Quandl (bitcoin),
 # xrpcharts.ripple.com (xrp), and etherchain.org (ether)
 
