@@ -5,7 +5,8 @@ query/querymerge.py is a python program used to perform analysis on large CSV da
 
 plot/plot.py is similar, but plots the data for each separate user to a graph along with an aggregate from the given function (mean, sum, etc).
 
-matplotlib contains an example matplotlib graph of bitcoin and ethereum prices for
-the year 2017, as well as the source code to generate the graph.
+matplotlib contains a matplotlib style sheet that is free and open for anyone to use or modify,
+and two scripts that generate graphs, each with a corresponding png file showing the graph
+generated. I chose to graph the cryptocurrencies Bitcoin, Ether, and XRP (Ripple).
 
 Since almost all coding is done in teams, I consider readability to be paramount when writing code. I may use two or three lines to do something that could be done in one, but it will make the code easier to follow and understand.

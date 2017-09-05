@@ -1,8 +1,8 @@
-# bitcoin + ethereum matplotlib example
+# bitcoin + ethereum matplotlib example 2
 # author: Eli Pandolfo
 #
 # A graph of bitcoin price compared to ether price for the year 2017,
-# with shared x axes to allow zooming in on both subplots at the same time,
+# with shared x axes,
 # and data retrieved from Quandl (bitcoin) and etherchain.org (ethereum)
 
 import quandl
@@ -40,39 +40,40 @@ def get_data():
 def plot(btc, eth):
 
 	fig = plt.figure()
-	fig.patch.set_facecolor('#d4d4d4')
-	fig.canvas.set_window_title('BTC + ETH 2017')
-
-	b = plt.subplot2grid((2, 1), (0, 0), rowspan=1, colspan=1)
-	e = plt.subplot2grid((2, 1), (1, 0), rowspan=1, colspan=1, sharex=b)
-	font = {'size': 16}
+	fig.patch.set_facecolor('#1c1c1c')
+	fig.canvas.set_window_title('BTC-ETH 2017 Overlapped')
 
 	# customize graphs
-	btc.plot(ax=b, color='darkred', linewidth=2)
-	b.set_title('Bitcoin', color='darkred', **font)
-	b.grid(True, color='#848484')
-	b.set_facecolor('#e5e5e5')
-	b.spines['bottom'].set_color('darkred')
-	b.spines['left'].set_color('darkred')
-	b.spines['top'].set_color('#111111')
-	b.spines['right'].set_color('#111111')
-	b.set_ylabel('Price (USD)')
-	b.xaxis.label.set_color('#111111')
-	b.yaxis.label.set_color('darkred')
-	b.tick_params(colors='#111111')
+	ax1 = btc.plot(color='#ff8f00', linewidth=.5)
+	ax1.grid(True, color='#848484', linewidth=.5, linestyle='--')
+	ax1.set_title('BTC/USD + ETH/USD 2017', color='#848484')
+	ax1.set_facecolor('#252525')
 
-	eth.plot(ax=e, color='tab:blue', linewidth=2)
-	e.set_title('Ether', color='tab:blue', **font)
-	e.grid(True, color='#848484')
-	e.set_facecolor('#e5e5e5')
-	e.spines['bottom'].set_color('tab:blue')
-	e.spines['left'].set_color('tab:blue')
-	e.spines['top'].set_color('#111111')
-	e.spines['right'].set_color('#111111')
-	e.set_ylabel('Price (USD)')
-	e.xaxis.label.set_color('#111111')
-	e.yaxis.label.set_color('tab:blue')
-	e.tick_params(colors='#111111')
+	ax1.tick_params(colors='#848484', axis='x', which='both')
+	ax1.xaxis.label.set_color('#848484')
+
+	ax1.tick_params(colors='#ff8f00', axis='y')
+	ax1.yaxis.label.set_color('#ff8f00')
+	ax1.set_ylabel('BTC Price (USD)')
+	ax1.set_ylim(bottom=750, top=5000)
+
+	ax2 = ax1.twinx()
+	eth.plot(color='#00e8d3', linewidth=.5, label='ETH', ax=ax2)
+
+	ax2.spines['bottom'].set_color('#848484')
+	ax2.spines['left'].set_color('#ff8f00')
+	ax2.spines['top'].set_color('#848484')
+	ax2.spines['right'].set_color('#00e8d3')
+
+	ax2.set_ylabel('ETH Price (USD)')
+	ax2.yaxis.label.set_color('#00e8d3')
+	ax2.tick_params(colors='#00e8d3', axis='y')
+	ax2.set_ylim(bottom=-25, top=400)
+
+	ax2.plot(0,0, label='BTC', linewidth=.5, color='#ff8f00')
+	leg = plt.legend(loc=2, facecolor='#1c1c1c', edgecolor='#848484')
+	for text in leg.get_texts():
+		text.set_color('#848484')
 
 	plt.tight_layout()
 	plt.show()
