@@ -1,5 +1,7 @@
 # DataAnalysis
-analysis on spreadsheets using pandas, numpy
+This repo holds some programs that analyze spreadsheets using Python, and the Pandas, Numpy, and Matplotlib modules. I wrote querymerge and plot for the LEEPS Econ lab at UCSC, so they may be hard to understand without context. 
+
+The matplotlib folder holds a couple programs I wrote to visualize financial data (with Matplotlib).
 
 query/querymerge.py is a python program used to perform analysis on large CSV data spreadsheets containing columns of biometric or sensor data. The program takes in a spreadsheet containing IDs, timestamps and 'screen names,' corresponding to the time a new window appears on a users computer. It then looks in a directory for a bunch of CSV files of processed data and finds the one with matching ID and a close timestamp. Then it finds the columns in that file corresponding to the name of the entered variables, and computes the mean, min, max, or standard deviation (or a combination of them) for the data in that column over a given time interval
 
