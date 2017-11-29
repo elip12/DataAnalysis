@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import datetime as dt
 import os
 
+# visualizes affdex or leda data for multiple players over a specified time range using matplotlib.
+# This version does not take in command line args. 
+
 # makes IDs 1-9 into 01-09
 def make_valid_ID(num):
 	if num < 10:
